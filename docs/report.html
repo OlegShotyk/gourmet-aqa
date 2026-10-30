@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title id="head-title">report.html</title>
+      <style type="text/css">body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+      </style>
+    
+  </head>
+  <body>
+    <h1 id="title">report.html</h1>
+    <p>Report generated on 30-Oct-2026 at 12:52:57 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+        v4.2.0</p>
+    <div id="environment-header">
+      <h2>Environment</h2>
+    </div>
+    <table id="environment"></table>
+    <!-- TEMPLATES -->
+      <template id="template_environment_row">
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
+    <template id="template_results-table__body--empty">
+      <tbody class="results-table-row">
+        <tr id="not-found-message">
+          <td colspan="4">No results found. Check the filters.</td>
+        </tr>
+      </tbody>
+    </template>
+    <template id="template_results-table__tbody">
+      <tbody class="results-table-row">
+        <tr class="collapsible">
+        </tr>
+        <tr class="extras-row">
+          <td class="extra" colspan="4">
+            <div class="extraHTML"></div>
+            <div class="media">
+              <div class="media-container">
+                  <div class="media-container__nav--left">&lt;</div>
+                  <div class="media-container__viewport">
+                    <img src="" />
+                    <video controls>
+                      <source src="" type="video/mp4">
+                    </video>
+                  </div>
+                  <div class="media-container__nav--right">&gt;</div>
+                </div>
+                <div class="media__name"></div>
+                <div class="media__counter"></div>
+            </div>
+            <div class="logwrapper">
+              <div class="logexpander"></div>
+              <div class="log"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </template>
+    <!-- END TEMPLATES -->
+    <div class="summary">
+      <div class="summary__data">
+        <h2>Summary</h2>
+        <div class="additional-summary prefix">
+        </div>
+        <p class="run-count">122 tests took 00:03:42.</p>
+        <p class="filter">(Un)check the boxes to filter the results.</p>
+        <div class="summary__reload">
+          <div class="summary__reload__button hidden" onclick="location.reload()">
+            <div>There are still tests running. <br />Reload this page to get the latest results!</div>
+          </div>
+        </div>
+        <div class="summary__spacer"></div>
+        <div class="controls">
+          <div class="filters">
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" disabled>
+            <span class="failed">0 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" >
+            <span class="passed">116 Passed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" disabled>
+            <span class="skipped">0 Skipped,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xfailed" >
+            <span class="xfailed">5 Expected failures,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xpassed" >
+            <span class="xpassed">1 Unexpected passes,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="error" disabled>
+            <span class="error">0 Errors,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="rerun" disabled>
+            <span class="rerun">0 Reruns</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="retried" disabled>
+            <span class="retried">0 Retried,</span>
+          </div>
+          <div class="collapse">
+            <button id="show_all_details">Show all details</button>&nbsp;/&nbsp;<button id="hide_all_details">Hide all details</button>
+          </div>
+        </div>
+      </div>
+      <div class="additional-summary summary">
+      </div>
+      <div class="additional-summary postfix">
+      </div>
+    </div>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable" data-column-type="result">Result</th>
+          <th class="sortable" data-column-type="testId">Test</th>
+          <th class="sortable" data-column-type="duration">Duration</th>
+          <th>Links</th>
+        </tr>
+      </thead>
+    </table>
+  <footer>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.13.18&#34;, &#34;Platform&#34;: &#34;Linux-6.18.44-fc-v185-x86_64-with-glibc2.39&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;9.2.0&#34;, &#34;pluggy&#34;: &#34;1.7.0&#34;}, &#34;Plugins&#34;: {&#34;playwright&#34;: &#34;0.10.0&#34;, &#34;html&#34;: &#34;4.2.0&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;}, &#34;JAVA_HOME&#34;: &#34;/usr/lib/jvm/java-21-openjdk-amd64&#34;}, &#34;tests&#34;: {&#34;tests/test_accessibility.py::test_tc012_skip_link_jumps_to_main[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_accessibility.py::test_tc012_skip_link_jumps_to_main[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_accessibility.py::test_tc012_skip_link_jumps_to_main[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_accessibility.py::test_tc044_single_h1_and_no_skipped_heading_levels[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_accessibility.py::test_tc044_single_h1_and_no_skipped_heading_levels[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_accessibility.py::test_tc044_single_h1_and_no_skipped_heading_levels[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_accessibility.py::test_tc045_axe_no_critical_or_serious_violations[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_accessibility.py::test_tc045_axe_no_critical_or_serious_violations[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_accessibility.py::test_tc045_axe_no_critical_or_serious_violations[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_accessibility.py::test_tc047_lang_and_logo_alt[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_accessibility.py::test_tc047_lang_and_logo_alt[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_accessibility.py::test_tc047_lang_and_logo_alt[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc020_submit_with_valid_data[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc020_submit_with_valid_data[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc020_submit_with_valid_data[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc021_submit_without_optional_message[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc021_submit_without_optional_message[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc021_submit_without_optional_message[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc024_name_with_two_chars_is_accepted[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc024_name_with_two_chars_is_accepted[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc024_name_with_two_chars_is_accepted[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc022_empty_name_blocks_submit[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc022_empty_name_blocks_submit[chromium]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc022_empty_name_blocks_submit[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc023_one_char_name_is_rejected_minlength[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc023_one_char_name_is_rejected_minlength[chromium]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc023_one_char_name_is_rejected_minlength[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc025_empty_email_blocks_submit[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc025_empty_email_blocks_submit[chromium]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc025_empty_email_blocks_submit[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-abc]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-abc]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-abc]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-abc@]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-abc@]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-abc@]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-@example.com]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-@example.com]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-@example.com]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-a b@example.com]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-a b@example.com]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-a b@example.com]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-abc@@example.com]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-abc@@example.com]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[chromium-abc@@example.com]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc027_whitespace_only_name_is_rejected[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc027_whitespace_only_name_is_rejected[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc027_whitespace_only_name_is_rejected[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;home = &amp;lt;pages.home_page.HomePage object at 0x7f1c02f0be30&amp;gt;\ncapture = &amp;lt;conftest.FormCapture object at 0x7f1c030a9f40&amp;gt;\n\n    @pytest.mark.bug\n    @pytest.mark.xfail(strict=True, reason=&amp;quot;BUG-002: \u0456\u043c&amp;#x27;\u044f \u0437 \u043e\u0434\u043d\u0438\u0445 \u043f\u0440\u043e\u0431\u0456\u043b\u0456\u0432 \u043f\u0440\u043e\u0445\u043e\u0434\u0438\u0442\u044c \u0432\u0430\u043b\u0456\u0434\u0430\u0446\u0456\u044e (minlength \u0431\u0435\u0437 trim)&amp;quot;)\n    def test_tc027_whitespace_only_name_is_rejected(home, capture):\n        home.fill_form(&amp;quot;   &amp;quot;, VALID_EMAIL).submit_form()\n&amp;gt;       capture.assert_none_sent()\n\ntests/test_contact_form.py:74: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = &amp;lt;conftest.FormCapture object at 0x7f1c030a9f40&amp;gt;, settle_ms = 400\n\n    def assert_none_sent(self, settle_ms: int = 400) -&amp;gt; None:\n        &amp;quot;&amp;quot;&amp;quot;\u041d\u0435\u0433\u0430\u0442\u0438\u0432\u043d\u0430 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u043a\u0430: \u0434\u0430\u0454\u043c\u043e \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0443 \u043a\u043e\u0440\u043e\u0442\u043a\u0438\u0439 \u0447\u0430\u0441 \u0456 \u043f\u0435\u0440\u0435\u043a\u043e\u043d\u0443\u0454\u043c\u043e\u0441\u044c, \u0449\u043e POST \u043d\u0435 \u043f\u0456\u0448\u043e\u0432.&amp;quot;&amp;quot;&amp;quot;\n        self._page.wait_for_timeout(settle_ms)\n&amp;gt;       assert self.count == 0, f&amp;quot;\u0424\u043e\u0440\u043c\u0430 \u0432\u0456\u0434\u043f\u0440\u0430\u0432\u0438\u043b\u0430\u0441\u044c, \u0445\u043e\u0447\u0430 \u043d\u0435 \u043c\u0430\u043b\u0430: {self.last_fields}&amp;quot;\nE       AssertionError: \u0424\u043e\u0440\u043c\u0430 \u0432\u0456\u0434\u043f\u0440\u0430\u0432\u0438\u043b\u0430\u0441\u044c, \u0445\u043e\u0447\u0430 \u043d\u0435 \u043c\u0430\u043b\u0430: {&amp;#x27;form-name&amp;#x27;: &amp;#x27;pairing-request&amp;#x27;, &amp;#x27;bot-field&amp;#x27;: &amp;#x27;&amp;#x27;, &amp;#x27;name&amp;#x27;: &amp;#x27;   &amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;olena@example.com&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;&amp;#x27;}\nE       assert 1 == 0\nE        +  where 1 = &amp;lt;conftest.FormCapture object at 0x7f1c030a9f40&amp;gt;.count\n\nconftest.py:52: AssertionError\n&#34;}], &#34;tests/test_contact_form.py::test_tc028_special_characters_are_sent_intact[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc028_special_characters_are_sent_intact[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc028_special_characters_are_sent_intact[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc029_xss_payload_is_not_executed[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc029_xss_payload_is_not_executed[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc029_xss_payload_is_not_executed[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc030_very_long_message[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc030_very_long_message[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc030_very_long_message[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc031_honeypot_is_hidden_from_users[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc031_honeypot_is_hidden_from_users[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc031_honeypot_is_hidden_from_users[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[chromium-name]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[chromium-name]&#34;, &#34;duration&#34;: &#34;966 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[chromium-name]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;966 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[chromium-email]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[chromium-email]&#34;, &#34;duration&#34;: &#34;918 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[chromium-email]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;918 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[chromium-message]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[chromium-message]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[chromium-message]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc033_form_is_declared_for_netlify[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc033_form_is_declared_for_netlify[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc033_form_is_declared_for_netlify[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;home = &amp;lt;pages.home_page.HomePage object at 0x7f1c02f672f0&amp;gt;\n\n    @pytest.mark.bug\n    @pytest.mark.xfail(strict=True, reason=&amp;quot;BUG-001 (\u0433\u0456\u043f\u043e\u0442\u0435\u0437\u0430): &amp;lt;form&amp;gt; \u0431\u0435\u0437 data-netlify=\\&amp;quot;true\\&amp;quot;: &amp;quot;\n                                           &amp;quot;Netlify \u043d\u0435 \u0432\u0438\u044f\u0432\u0438\u0442\u044c \u0444\u043e\u0440\u043c\u0443 \u043f\u0456\u0434 \u0447\u0430\u0441 \u0434\u0435\u043f\u043b\u043e\u044e, \u0432\u0456\u0434\u043f\u0440\u0430\u0432\u043a\u0430 \u043d\u0430 \u043f\u0440\u043e\u0434\u0456 \u043c\u043e\u0436\u0435 \u043f\u043e\u0432\u0435\u0440\u0442\u0430\u0442\u0438 404&amp;quot;)\n    def test_tc033_form_is_declared_for_netlify(home):\n        attrs = home.form.evaluate(&amp;quot;el =&amp;gt; ({dn: el.getAttribute(&amp;#x27;data-netlify&amp;#x27;), n: el.hasAttribute(&amp;#x27;netlify&amp;#x27;)})&amp;quot;)\n&amp;gt;       assert attrs[&amp;quot;dn&amp;quot;] == &amp;quot;true&amp;quot; or attrs[&amp;quot;n&amp;quot;], f&amp;quot;\u041d\u0435\u043c\u0430\u0454 Netlify-\u0430\u0442\u0440\u0438\u0431\u0443\u0442\u0430 \u043d\u0430 \u0444\u043e\u0440\u043c\u0456: {attrs}&amp;quot;\nE       AssertionError: \u041d\u0435\u043c\u0430\u0454 Netlify-\u0430\u0442\u0440\u0438\u0431\u0443\u0442\u0430 \u043d\u0430 \u0444\u043e\u0440\u043c\u0456: {&amp;#x27;dn&amp;#x27;: None, &amp;#x27;n&amp;#x27;: False}\nE       assert (None == &amp;#x27;true&amp;#x27; or False)\n\ntests/test_contact_form.py:121: AssertionError\n&#34;}], &#34;tests/test_contact_form.py::test_tc036_double_click_does_not_send_duplicates[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XPassed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc036_double_click_does_not_send_duplicates[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XPassed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc036_double_click_does_not_send_duplicates[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_media.py::test_tc017_background_video_pause_and_resume[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_media.py::test_tc017_background_video_pause_and_resume[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_media.py::test_tc017_background_video_pause_and_resume[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_media.py::test_tc018_youtube_loads_only_after_click[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_media.py::test_tc018_youtube_loads_only_after_click[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_media.py::test_tc018_youtube_loads_only_after_click[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_media.py::test_tc019_video_hidden_with_reduced_motion[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_media.py::test_tc019_video_hidden_with_reduced_motion[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_media.py::test_tc019_video_hidden_with_reduced_motion[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_media.py::test_tc037_map_loads_lazily[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_media.py::test_tc037_map_loads_lazily[chromium]&#34;, &#34;duration&#34;: &#34;995 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_media.py::test_tc037_map_loads_lazily[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;995 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u041f\\u0435\\u0440\\u0435\\u0432\\u0430\\u0433\\u0438]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u041f\\u0435\\u0440\\u0435\\u0432\\u0430\\u0433\\u0438]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u041f\\u0435\\u0440\\u0435\\u0432\\u0430\\u0433\\u0438]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u041f\\u043e\\u0441\\u043b\\u0443\\u0433\\u0438]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u041f\\u043e\\u0441\\u043b\\u0443\\u0433\\u0438]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u041f\\u043e\\u0441\\u043b\\u0443\\u0433\\u0438]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u042f\\u043a \\u0446\\u0435 \\u043f\\u0440\\u0430\\u0446\\u044e\\u0454]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u042f\\u043a \\u0446\\u0435 \\u043f\\u0440\\u0430\\u0446\\u044e\\u0454]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u042f\\u043a \\u0446\\u0435 \\u043f\\u0440\\u0430\\u0446\\u044e\\u0454]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u041f\\u0440\\u043e \\u043d\\u0430\\u0441]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u041f\\u0440\\u043e \\u043d\\u0430\\u0441]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u041f\\u0440\\u043e \\u043d\\u0430\\u0441]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u041a\\u043e\\u043d\\u0442\\u0430\\u043a\\u0442\\u0438]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u041a\\u043e\\u043d\\u0442\\u0430\\u043a\\u0442\\u0438]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[chromium-\\u041a\\u043e\\u043d\\u0442\\u0430\\u043a\\u0442\\u0438]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc007_logo_scrolls_to_top[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc007_logo_scrolls_to_top[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc007_logo_scrolls_to_top[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc008_header_cta_goes_to_form[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc008_header_cta_goes_to_form[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc008_header_cta_goes_to_form[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc009_hero_cta_goes_to_form[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc009_hero_cta_goes_to_form[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc009_hero_cta_goes_to_form[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc010_hero_cta_goes_to_services[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc010_hero_cta_goes_to_services[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc010_hero_cta_goes_to_services[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[chromium-service-1-cta]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[chromium-service-1-cta]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[chromium-service-1-cta]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[chromium-service-2-cta]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[chromium-service-2-cta]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[chromium-service-2-cta]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[chromium-service-3-cta]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[chromium-service-3-cta]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[chromium-service-3-cta]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc013_footer_links[chromium-\\u0417\\u0430\\u043b\\u0438\\u0448\\u0438\\u0442\\u0438 \\u0437\\u0430\\u043f\\u0438\\u0442-#contact]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc013_footer_links[chromium-\\u0417\\u0430\\u043b\\u0438\\u0448\\u0438\\u0442\\u0438 \\u0437\\u0430\\u043f\\u0438\\u0442-#contact]&#34;, &#34;duration&#34;: &#34;998 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc013_footer_links[chromium-\\u0417\\u0430\\u043b\\u0438\\u0448\\u0438\\u0442\\u0438 \\u0437\\u0430\\u043f\\u0438\\u0442-#contact]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;998 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc013_footer_links[chromium-\\u041f\\u0435\\u0440\\u0441\\u043e\\u043d\\u0430\\u043b\\u044c\\u043d\\u0430 \\u043a\\u043e\\u043d\\u0441\\u0443\\u043b\\u044c\\u0442\\u0430\\u0446\\u0456\\u044f-#contact]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc013_footer_links[chromium-\\u041f\\u0435\\u0440\\u0441\\u043e\\u043d\\u0430\\u043b\\u044c\\u043d\\u0430 \\u043a\\u043e\\u043d\\u0441\\u0443\\u043b\\u044c\\u0442\\u0430\\u0446\\u0456\\u044f-#contact]&#34;, &#34;duration&#34;: &#34;973 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc013_footer_links[chromium-\\u041f\\u0435\\u0440\\u0441\\u043e\\u043d\\u0430\\u043b\\u044c\\u043d\\u0430 \\u043a\\u043e\\u043d\\u0441\\u0443\\u043b\\u044c\\u0442\\u0430\\u0446\\u0456\\u044f-#contact]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;973 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc013_footer_links[chromium-\\u0414\\u0435\\u0433\\u0443\\u0441\\u0442\\u0430\\u0446\\u0456\\u044f \\u0434\\u043b\\u044f \\u043a\\u043e\\u043c\\u043f\\u0430\\u043d\\u0456\\u0457-#contact]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc013_footer_links[chromium-\\u0414\\u0435\\u0433\\u0443\\u0441\\u0442\\u0430\\u0446\\u0456\\u044f \\u0434\\u043b\\u044f \\u043a\\u043e\\u043c\\u043f\\u0430\\u043d\\u0456\\u0457-#contact]&#34;, &#34;duration&#34;: &#34;959 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc013_footer_links[chromium-\\u0414\\u0435\\u0433\\u0443\\u0441\\u0442\\u0430\\u0446\\u0456\\u044f \\u0434\\u043b\\u044f \\u043a\\u043e\\u043c\\u043f\\u0430\\u043d\\u0456\\u0457-#contact]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;959 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc013_footer_links[chromium-\\u041f\\u0456\\u0434\\u0431\\u0456\\u0440 \\u0434\\u043e \\u0432\\u0430\\u0448\\u043e\\u0433\\u043e \\u043c\\u0435\\u043d\\u044e-#contact]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc013_footer_links[chromium-\\u041f\\u0456\\u0434\\u0431\\u0456\\u0440 \\u0434\\u043e \\u0432\\u0430\\u0448\\u043e\\u0433\\u043e \\u043c\\u0435\\u043d\\u044e-#contact]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc013_footer_links[chromium-\\u041f\\u0456\\u0434\\u0431\\u0456\\u0440 \\u0434\\u043e \\u0432\\u0430\\u0448\\u043e\\u0433\\u043e \\u043c\\u0435\\u043d\\u044e-#contact]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[chromium-320]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[chromium-320]&#34;, &#34;duration&#34;: &#34;990 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc041_no_horizontal_scroll[chromium-320]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;990 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[chromium-375]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[chromium-375]&#34;, &#34;duration&#34;: &#34;803 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc041_no_horizontal_scroll[chromium-375]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;803 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[chromium-768]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[chromium-768]&#34;, &#34;duration&#34;: &#34;856 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc041_no_horizontal_scroll[chromium-768]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;856 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[chromium-1280]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[chromium-1280]&#34;, &#34;duration&#34;: &#34;988 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc041_no_horizontal_scroll[chromium-1280]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;988 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc042_desktop_shows_menu_hides_burger[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc042_desktop_shows_menu_hides_burger[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc042_desktop_shows_menu_hides_burger[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc014_mobile_menu_opens_and_closes[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc014_mobile_menu_opens_and_closes[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc014_mobile_menu_opens_and_closes[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc015_mobile_link_scrolls_and_closes_menu[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc015_mobile_link_scrolls_and_closes_menu[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc015_mobile_link_scrolls_and_closes_menu[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc016_escape_closes_menu_and_returns_focus[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc016_escape_closes_menu_and_returns_focus[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc016_escape_closes_menu_and_returns_focus[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc051_menu_closes_when_viewport_grows[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc051_menu_closes_when_viewport_grows[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc051_menu_closes_when_viewport_grows[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc043_form_usable_on_320px[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc043_form_usable_on_320px[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc043_form_usable_on_320px[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_smoke.py::test_tc001_page_loads_with_title_and_h1[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_smoke.py::test_tc001_page_loads_with_title_and_h1[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_smoke.py::test_tc001_page_loads_with_title_and_h1[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_smoke.py::test_tc002_no_console_errors_or_failed_own_requests[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_smoke.py::test_tc002_no_console_errors_or_failed_own_requests[chromium]&#34;, &#34;duration&#34;: &#34;985 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_smoke.py::test_tc002_no_console_errors_or_failed_own_requests[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;985 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_smoke.py::test_tc003_all_images_load[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_smoke.py::test_tc003_all_images_load[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_smoke.py::test_tc003_all_images_load[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_smoke.py::test_tc004_unknown_page_returns_404[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_smoke.py::test_tc004_unknown_page_returns_404[chromium]&#34;, &#34;duration&#34;: &#34;500 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_smoke.py::test_tc004_unknown_page_returns_404[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;500 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_smoke.py::test_tc005_http_redirects_to_https_and_hsts_present[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_smoke.py::test_tc005_http_redirects_to_https_and_hsts_present[chromium]&#34;, &#34;duration&#34;: &#34;610 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_smoke.py::test_tc005_http_redirects_to_https_and_hsts_present[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;610 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_smoke.py::test_tc048_meta_description_and_favicon[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_smoke.py::test_tc048_meta_description_and_favicon[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_smoke.py::test_tc048_meta_description_and_favicon[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_accessibility.py::test_tc012_skip_link_jumps_to_main[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_accessibility.py::test_tc012_skip_link_jumps_to_main[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_accessibility.py::test_tc012_skip_link_jumps_to_main[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_accessibility.py::test_tc044_single_h1_and_no_skipped_heading_levels[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_accessibility.py::test_tc044_single_h1_and_no_skipped_heading_levels[webkit]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_accessibility.py::test_tc044_single_h1_and_no_skipped_heading_levels[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_accessibility.py::test_tc045_axe_no_critical_or_serious_violations[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_accessibility.py::test_tc045_axe_no_critical_or_serious_violations[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_accessibility.py::test_tc045_axe_no_critical_or_serious_violations[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_accessibility.py::test_tc047_lang_and_logo_alt[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_accessibility.py::test_tc047_lang_and_logo_alt[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_accessibility.py::test_tc047_lang_and_logo_alt[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc020_submit_with_valid_data[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc020_submit_with_valid_data[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc020_submit_with_valid_data[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc021_submit_without_optional_message[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc021_submit_without_optional_message[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc021_submit_without_optional_message[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc024_name_with_two_chars_is_accepted[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc024_name_with_two_chars_is_accepted[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc024_name_with_two_chars_is_accepted[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc022_empty_name_blocks_submit[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc022_empty_name_blocks_submit[webkit]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc022_empty_name_blocks_submit[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc023_one_char_name_is_rejected_minlength[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc023_one_char_name_is_rejected_minlength[webkit]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc023_one_char_name_is_rejected_minlength[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc025_empty_email_blocks_submit[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc025_empty_email_blocks_submit[webkit]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc025_empty_email_blocks_submit[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-abc]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-abc]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-abc]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-abc@]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-abc@]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-abc@]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-@example.com]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-@example.com]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-@example.com]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-a b@example.com]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-a b@example.com]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-a b@example.com]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-abc@@example.com]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-abc@@example.com]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc026_invalid_email_formats_rejected[webkit-abc@@example.com]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc027_whitespace_only_name_is_rejected[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc027_whitespace_only_name_is_rejected[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc027_whitespace_only_name_is_rejected[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;home = &amp;lt;pages.home_page.HomePage object at 0x7f1c02f0bad0&amp;gt;\ncapture = &amp;lt;conftest.FormCapture object at 0x7f1c01f89010&amp;gt;\n\n    @pytest.mark.bug\n    @pytest.mark.xfail(strict=True, reason=&amp;quot;BUG-002: \u0456\u043c&amp;#x27;\u044f \u0437 \u043e\u0434\u043d\u0438\u0445 \u043f\u0440\u043e\u0431\u0456\u043b\u0456\u0432 \u043f\u0440\u043e\u0445\u043e\u0434\u0438\u0442\u044c \u0432\u0430\u043b\u0456\u0434\u0430\u0446\u0456\u044e (minlength \u0431\u0435\u0437 trim)&amp;quot;)\n    def test_tc027_whitespace_only_name_is_rejected(home, capture):\n        home.fill_form(&amp;quot;   &amp;quot;, VALID_EMAIL).submit_form()\n&amp;gt;       capture.assert_none_sent()\n\ntests/test_contact_form.py:74: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = &amp;lt;conftest.FormCapture object at 0x7f1c01f89010&amp;gt;, settle_ms = 400\n\n    def assert_none_sent(self, settle_ms: int = 400) -&amp;gt; None:\n        &amp;quot;&amp;quot;&amp;quot;\u041d\u0435\u0433\u0430\u0442\u0438\u0432\u043d\u0430 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u043a\u0430: \u0434\u0430\u0454\u043c\u043e \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0443 \u043a\u043e\u0440\u043e\u0442\u043a\u0438\u0439 \u0447\u0430\u0441 \u0456 \u043f\u0435\u0440\u0435\u043a\u043e\u043d\u0443\u0454\u043c\u043e\u0441\u044c, \u0449\u043e POST \u043d\u0435 \u043f\u0456\u0448\u043e\u0432.&amp;quot;&amp;quot;&amp;quot;\n        self._page.wait_for_timeout(settle_ms)\n&amp;gt;       assert self.count == 0, f&amp;quot;\u0424\u043e\u0440\u043c\u0430 \u0432\u0456\u0434\u043f\u0440\u0430\u0432\u0438\u043b\u0430\u0441\u044c, \u0445\u043e\u0447\u0430 \u043d\u0435 \u043c\u0430\u043b\u0430: {self.last_fields}&amp;quot;\nE       AssertionError: \u0424\u043e\u0440\u043c\u0430 \u0432\u0456\u0434\u043f\u0440\u0430\u0432\u0438\u043b\u0430\u0441\u044c, \u0445\u043e\u0447\u0430 \u043d\u0435 \u043c\u0430\u043b\u0430: {&amp;#x27;form-name&amp;#x27;: &amp;#x27;pairing-request&amp;#x27;, &amp;#x27;bot-field&amp;#x27;: &amp;#x27;&amp;#x27;, &amp;#x27;name&amp;#x27;: &amp;#x27;   &amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;olena@example.com&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;&amp;#x27;}\nE       assert 1 == 0\nE        +  where 1 = &amp;lt;conftest.FormCapture object at 0x7f1c01f89010&amp;gt;.count\n\nconftest.py:52: AssertionError\n&#34;}], &#34;tests/test_contact_form.py::test_tc028_special_characters_are_sent_intact[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc028_special_characters_are_sent_intact[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc028_special_characters_are_sent_intact[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc029_xss_payload_is_not_executed[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc029_xss_payload_is_not_executed[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc029_xss_payload_is_not_executed[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc030_very_long_message[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc030_very_long_message[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc030_very_long_message[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc031_honeypot_is_hidden_from_users[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc031_honeypot_is_hidden_from_users[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc031_honeypot_is_hidden_from_users[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[webkit-name]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[webkit-name]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[webkit-name]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[webkit-email]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[webkit-email]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[webkit-email]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[webkit-message]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[webkit-message]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc032_labels_focus_their_fields[webkit-message]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_contact_form.py::test_tc033_form_is_declared_for_netlify[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc033_form_is_declared_for_netlify[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc033_form_is_declared_for_netlify[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;home = &amp;lt;pages.home_page.HomePage object at 0x7f1c02f1f1d0&amp;gt;\n\n    @pytest.mark.bug\n    @pytest.mark.xfail(strict=True, reason=&amp;quot;BUG-001 (\u0433\u0456\u043f\u043e\u0442\u0435\u0437\u0430): &amp;lt;form&amp;gt; \u0431\u0435\u0437 data-netlify=\\&amp;quot;true\\&amp;quot;: &amp;quot;\n                                           &amp;quot;Netlify \u043d\u0435 \u0432\u0438\u044f\u0432\u0438\u0442\u044c \u0444\u043e\u0440\u043c\u0443 \u043f\u0456\u0434 \u0447\u0430\u0441 \u0434\u0435\u043f\u043b\u043e\u044e, \u0432\u0456\u0434\u043f\u0440\u0430\u0432\u043a\u0430 \u043d\u0430 \u043f\u0440\u043e\u0434\u0456 \u043c\u043e\u0436\u0435 \u043f\u043e\u0432\u0435\u0440\u0442\u0430\u0442\u0438 404&amp;quot;)\n    def test_tc033_form_is_declared_for_netlify(home):\n        attrs = home.form.evaluate(&amp;quot;el =&amp;gt; ({dn: el.getAttribute(&amp;#x27;data-netlify&amp;#x27;), n: el.hasAttribute(&amp;#x27;netlify&amp;#x27;)})&amp;quot;)\n&amp;gt;       assert attrs[&amp;quot;dn&amp;quot;] == &amp;quot;true&amp;quot; or attrs[&amp;quot;n&amp;quot;], f&amp;quot;\u041d\u0435\u043c\u0430\u0454 Netlify-\u0430\u0442\u0440\u0438\u0431\u0443\u0442\u0430 \u043d\u0430 \u0444\u043e\u0440\u043c\u0456: {attrs}&amp;quot;\nE       AssertionError: \u041d\u0435\u043c\u0430\u0454 Netlify-\u0430\u0442\u0440\u0438\u0431\u0443\u0442\u0430 \u043d\u0430 \u0444\u043e\u0440\u043c\u0456: {&amp;#x27;dn&amp;#x27;: None, &amp;#x27;n&amp;#x27;: False}\nE       assert (None == &amp;#x27;true&amp;#x27; or False)\n\ntests/test_contact_form.py:121: AssertionError\n&#34;}], &#34;tests/test_contact_form.py::test_tc036_double_click_does_not_send_duplicates[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;tests/test_contact_form.py::test_tc036_double_click_does_not_send_duplicates[webkit]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_contact_form.py::test_tc036_double_click_does_not_send_duplicates[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;home = &amp;lt;pages.home_page.HomePage object at 0x7f1c02f1ef90&amp;gt;\ncapture = &amp;lt;conftest.FormCapture object at 0x7f1c02312690&amp;gt;\n\n    @pytest.mark.bug\n    @pytest.mark.xfail(strict=False, reason=&amp;quot;BUG-003: \u043d\u0435\u043c\u0430\u0454 \u0437\u0430\u0445\u0438\u0441\u0442\u0443 \u0432\u0456\u0434 \u043f\u043e\u0434\u0432\u0456\u0439\u043d\u043e\u0457 \u0432\u0456\u0434\u043f\u0440\u0430\u0432\u043a\u0438 (WebKit: 2 POST; &amp;quot;\n                                            &amp;quot;\u0443 Chromium \u0437\u0430\u043b\u0435\u0436\u0438\u0442\u044c \u0432\u0456\u0434 \u0442\u0430\u0439\u043c\u0456\u043d\u0433\u0443, \u0442\u043e\u043c\u0443 strict=False)&amp;quot;)\n    def test_tc036_double_click_does_not_send_duplicates(home, capture):\n        home.fill_form(VALID_NAME, VALID_EMAIL)\n        home.submit.dblclick()\n        capture.wait_for(1)\n        home.page.wait_for_timeout(500)\n&amp;gt;       assert capture.count == 1, f&amp;quot;\u0412\u0456\u0434\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u043e {capture.count} \u0437\u0430\u043f\u0438\u0442\u0456\u0432 \u0437\u0430\u043c\u0456\u0441\u0442\u044c 1&amp;quot;\nE       AssertionError: \u0412\u0456\u0434\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u043e 2 \u0437\u0430\u043f\u0438\u0442\u0456\u0432 \u0437\u0430\u043c\u0456\u0441\u0442\u044c 1\nE       assert 2 == 1\nE        +  where 2 = &amp;lt;conftest.FormCapture object at 0x7f1c02312690&amp;gt;.count\n\ntests/test_contact_form.py:133: AssertionError\n&#34;}], &#34;tests/test_media.py::test_tc017_background_video_pause_and_resume[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_media.py::test_tc017_background_video_pause_and_resume[webkit]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_media.py::test_tc017_background_video_pause_and_resume[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_media.py::test_tc018_youtube_loads_only_after_click[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_media.py::test_tc018_youtube_loads_only_after_click[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_media.py::test_tc018_youtube_loads_only_after_click[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_media.py::test_tc019_video_hidden_with_reduced_motion[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_media.py::test_tc019_video_hidden_with_reduced_motion[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_media.py::test_tc019_video_hidden_with_reduced_motion[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_media.py::test_tc037_map_loads_lazily[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_media.py::test_tc037_map_loads_lazily[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_media.py::test_tc037_map_loads_lazily[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u041f\\u0435\\u0440\\u0435\\u0432\\u0430\\u0433\\u0438]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u041f\\u0435\\u0440\\u0435\\u0432\\u0430\\u0433\\u0438]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u041f\\u0435\\u0440\\u0435\\u0432\\u0430\\u0433\\u0438]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u041f\\u043e\\u0441\\u043b\\u0443\\u0433\\u0438]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u041f\\u043e\\u0441\\u043b\\u0443\\u0433\\u0438]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u041f\\u043e\\u0441\\u043b\\u0443\\u0433\\u0438]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u042f\\u043a \\u0446\\u0435 \\u043f\\u0440\\u0430\\u0446\\u044e\\u0454]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u042f\\u043a \\u0446\\u0435 \\u043f\\u0440\\u0430\\u0446\\u044e\\u0454]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u042f\\u043a \\u0446\\u0435 \\u043f\\u0440\\u0430\\u0446\\u044e\\u0454]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u041f\\u0440\\u043e \\u043d\\u0430\\u0441]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u041f\\u0440\\u043e \\u043d\\u0430\\u0441]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u041f\\u0440\\u043e \\u043d\\u0430\\u0441]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u041a\\u043e\\u043d\\u0442\\u0430\\u043a\\u0442\\u0438]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u041a\\u043e\\u043d\\u0442\\u0430\\u043a\\u0442\\u0438]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc006_menu_link_scrolls_to_section[webkit-\\u041a\\u043e\\u043d\\u0442\\u0430\\u043a\\u0442\\u0438]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc007_logo_scrolls_to_top[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc007_logo_scrolls_to_top[webkit]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc007_logo_scrolls_to_top[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc008_header_cta_goes_to_form[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc008_header_cta_goes_to_form[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc008_header_cta_goes_to_form[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc009_hero_cta_goes_to_form[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc009_hero_cta_goes_to_form[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc009_hero_cta_goes_to_form[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc010_hero_cta_goes_to_services[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc010_hero_cta_goes_to_services[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc010_hero_cta_goes_to_services[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[webkit-service-1-cta]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[webkit-service-1-cta]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[webkit-service-1-cta]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[webkit-service-2-cta]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[webkit-service-2-cta]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[webkit-service-2-cta]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[webkit-service-3-cta]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[webkit-service-3-cta]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc011_choose_format_buttons_go_to_form[webkit-service-3-cta]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc013_footer_links[webkit-\\u0417\\u0430\\u043b\\u0438\\u0448\\u0438\\u0442\\u0438 \\u0437\\u0430\\u043f\\u0438\\u0442-#contact]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc013_footer_links[webkit-\\u0417\\u0430\\u043b\\u0438\\u0448\\u0438\\u0442\\u0438 \\u0437\\u0430\\u043f\\u0438\\u0442-#contact]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc013_footer_links[webkit-\\u0417\\u0430\\u043b\\u0438\\u0448\\u0438\\u0442\\u0438 \\u0437\\u0430\\u043f\\u0438\\u0442-#contact]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc013_footer_links[webkit-\\u041f\\u0435\\u0440\\u0441\\u043e\\u043d\\u0430\\u043b\\u044c\\u043d\\u0430 \\u043a\\u043e\\u043d\\u0441\\u0443\\u043b\\u044c\\u0442\\u0430\\u0446\\u0456\\u044f-#contact]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc013_footer_links[webkit-\\u041f\\u0435\\u0440\\u0441\\u043e\\u043d\\u0430\\u043b\\u044c\\u043d\\u0430 \\u043a\\u043e\\u043d\\u0441\\u0443\\u043b\\u044c\\u0442\\u0430\\u0446\\u0456\\u044f-#contact]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc013_footer_links[webkit-\\u041f\\u0435\\u0440\\u0441\\u043e\\u043d\\u0430\\u043b\\u044c\\u043d\\u0430 \\u043a\\u043e\\u043d\\u0441\\u0443\\u043b\\u044c\\u0442\\u0430\\u0446\\u0456\\u044f-#contact]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc013_footer_links[webkit-\\u0414\\u0435\\u0433\\u0443\\u0441\\u0442\\u0430\\u0446\\u0456\\u044f \\u0434\\u043b\\u044f \\u043a\\u043e\\u043c\\u043f\\u0430\\u043d\\u0456\\u0457-#contact]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc013_footer_links[webkit-\\u0414\\u0435\\u0433\\u0443\\u0441\\u0442\\u0430\\u0446\\u0456\\u044f \\u0434\\u043b\\u044f \\u043a\\u043e\\u043c\\u043f\\u0430\\u043d\\u0456\\u0457-#contact]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc013_footer_links[webkit-\\u0414\\u0435\\u0433\\u0443\\u0441\\u0442\\u0430\\u0446\\u0456\\u044f \\u0434\\u043b\\u044f \\u043a\\u043e\\u043c\\u043f\\u0430\\u043d\\u0456\\u0457-#contact]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_navigation.py::test_tc013_footer_links[webkit-\\u041f\\u0456\\u0434\\u0431\\u0456\\u0440 \\u0434\\u043e \\u0432\\u0430\\u0448\\u043e\\u0433\\u043e \\u043c\\u0435\\u043d\\u044e-#contact]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_navigation.py::test_tc013_footer_links[webkit-\\u041f\\u0456\\u0434\\u0431\\u0456\\u0440 \\u0434\\u043e \\u0432\\u0430\\u0448\\u043e\\u0433\\u043e \\u043c\\u0435\\u043d\\u044e-#contact]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_navigation.py::test_tc013_footer_links[webkit-\\u041f\\u0456\\u0434\\u0431\\u0456\\u0440 \\u0434\\u043e \\u0432\\u0430\\u0448\\u043e\\u0433\\u043e \\u043c\\u0435\\u043d\\u044e-#contact]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[webkit-320]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[webkit-320]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc041_no_horizontal_scroll[webkit-320]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[webkit-375]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[webkit-375]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc041_no_horizontal_scroll[webkit-375]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[webkit-768]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[webkit-768]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc041_no_horizontal_scroll[webkit-768]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[webkit-1280]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc041_no_horizontal_scroll[webkit-1280]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc041_no_horizontal_scroll[webkit-1280]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc042_desktop_shows_menu_hides_burger[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc042_desktop_shows_menu_hides_burger[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc042_desktop_shows_menu_hides_burger[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc014_mobile_menu_opens_and_closes[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc014_mobile_menu_opens_and_closes[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc014_mobile_menu_opens_and_closes[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc015_mobile_link_scrolls_and_closes_menu[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc015_mobile_link_scrolls_and_closes_menu[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc015_mobile_link_scrolls_and_closes_menu[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc016_escape_closes_menu_and_returns_focus[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc016_escape_closes_menu_and_returns_focus[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc016_escape_closes_menu_and_returns_focus[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc051_menu_closes_when_viewport_grows[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc051_menu_closes_when_viewport_grows[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc051_menu_closes_when_viewport_grows[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_responsive.py::test_tc043_form_usable_on_320px[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_responsive.py::test_tc043_form_usable_on_320px[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_responsive.py::test_tc043_form_usable_on_320px[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_smoke.py::test_tc001_page_loads_with_title_and_h1[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_smoke.py::test_tc001_page_loads_with_title_and_h1[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_smoke.py::test_tc001_page_loads_with_title_and_h1[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_smoke.py::test_tc002_no_console_errors_or_failed_own_requests[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_smoke.py::test_tc002_no_console_errors_or_failed_own_requests[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_smoke.py::test_tc002_no_console_errors_or_failed_own_requests[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_smoke.py::test_tc003_all_images_load[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_smoke.py::test_tc003_all_images_load[webkit]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_smoke.py::test_tc003_all_images_load[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_smoke.py::test_tc004_unknown_page_returns_404[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_smoke.py::test_tc004_unknown_page_returns_404[webkit]&#34;, &#34;duration&#34;: &#34;692 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_smoke.py::test_tc004_unknown_page_returns_404[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;692 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_smoke.py::test_tc005_http_redirects_to_https_and_hsts_present[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_smoke.py::test_tc005_http_redirects_to_https_and_hsts_present[webkit]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_smoke.py::test_tc005_http_redirects_to_https_and_hsts_present[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_smoke.py::test_tc048_meta_description_and_favicon[webkit]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_smoke.py::test_tc048_meta_description_and_favicon[webkit]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_smoke.py::test_tc048_meta_description_and_favicon[webkit]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;report.html&#34;}"></div>
+    <script>
+      (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
+
+class DataManager {
+    setManager(data) {
+        const collapsedCategories = [...getCollapsedCategory(data.renderCollapsed)]
+        const collapsedIds = []
+        const tests = Object.values(data.tests).flat().map((test, index) => {
+            const collapsed = collapsedCategories.includes(test.result.toLowerCase())
+            const id = `test_${index}`
+            if (collapsed) {
+                collapsedIds.push(id)
+            }
+            return {
+                ...test,
+                id,
+                collapsed,
+            }
+        })
+        const dataBlob = { ...data, tests }
+        this.data = { ...dataBlob }
+        this.renderData = { ...dataBlob }
+        setCollapsedIds(collapsedIds)
+    }
+
+    get allData() {
+        return { ...this.data }
+    }
+
+    resetRender() {
+        this.renderData = { ...this.data }
+    }
+
+    setRender(data) {
+        this.renderData.tests = [...data]
+    }
+
+    toggleCollapsedItem(id) {
+        this.renderData.tests = this.renderData.tests.map((test) =>
+            test.id === id ? { ...test, collapsed: !test.collapsed } : test,
+        )
+    }
+
+    set allCollapsed(collapsed) {
+        this.renderData = { ...this.renderData, tests: [...this.renderData.tests.map((test) => (
+            { ...test, collapsed }
+        ))] }
+    }
+
+    get testSubset() {
+        return [...this.renderData.tests]
+    }
+
+    get environment() {
+        return this.renderData.environment
+    }
+
+    get initialSort() {
+        return this.data.initialSort
+    }
+}
+
+module.exports = {
+    manager: new DataManager(),
+}
+
+},{"./storage.js":8}],2:[function(require,module,exports){
+const mediaViewer = require('./mediaviewer.js')
+const templateEnvRow = document.getElementById('template_environment_row')
+const templateResult = document.getElementById('template_results-table__tbody')
+
+function htmlToElements(html) {
+    const temp = document.createElement('template')
+    temp.innerHTML = html
+    return temp.content.childNodes
+}
+
+const find = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return elem.querySelector(selector)
+}
+
+const findAll = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return [...elem.querySelectorAll(selector)]
+}
+
+const dom = {
+    getStaticRow: (key, value) => {
+        const envRow = templateEnvRow.content.cloneNode(true)
+        const isObj = typeof value === 'object' && value !== null
+        const values = isObj ? Object.keys(value).map((k) => `${k}: ${value[k]}`) : null
+
+        const valuesElement = htmlToElements(
+            values ? `<ul>${values.map((val) => `<li>${val}</li>`).join('')}<ul>` : `<div>${value}</div>`)[0]
+        const td = findAll('td', envRow)
+        td[0].textContent = key
+        td[1].appendChild(valuesElement)
+
+        return envRow
+    },
+    getResultTBody: ({ testId, id, log, extras, resultsTableRow, tableHtml, result, collapsed }) => {
+        const resultBody = templateResult.content.cloneNode(true)
+        resultBody.querySelector('tbody').classList.add(result.toLowerCase())
+        resultBody.querySelector('tbody').id = testId
+        resultBody.querySelector('.collapsible').dataset.id = id
+
+        resultsTableRow.forEach((html) => {
+            const t = document.createElement('template')
+            t.innerHTML = html
+            resultBody.querySelector('.collapsible').appendChild(t.content)
+        })
+
+        if (log) {
+            // Wrap lines starting with "E" with span.error to color those lines red
+            const wrappedLog = log.replace(/^E.*$/gm, (match) => `<span class="error">${match}</span>`)
+            resultBody.querySelector('.log').innerHTML = wrappedLog
+        } else {
+            resultBody.querySelector('.log').remove()
+        }
+
+        if (collapsed) {
+            resultBody.querySelector('.collapsible > .col-result')?.classList.add('collapsed')
+            resultBody.querySelector('.extras-row').classList.add('hidden')
+        } else {
+            resultBody.querySelector('.collapsible > .col-result')?.classList.remove('collapsed')
+        }
+
+        const media = []
+        extras?.forEach(({ name, format_type, content }) => {
+            if (['image', 'video'].includes(format_type)) {
+                media.push({ path: content, name, format_type })
+            }
+
+            if (format_type === 'html') {
+                resultBody.querySelector('.extraHTML').insertAdjacentHTML('beforeend', `<div>${content}</div>`)
+            }
+        })
+        mediaViewer.setup(resultBody, media)
+
+        // Add custom html from the pytest_html_results_table_html hook
+        tableHtml?.forEach((item) => {
+            resultBody.querySelector('td[class="extra"]').insertAdjacentHTML('beforeend', item)
+        })
+
+        return resultBody
+    },
+}
+
+module.exports = {
+    dom,
+    htmlToElements,
+    find,
+    findAll,
+}
+
+},{"./mediaviewer.js":6}],3:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const storageModule = require('./storage.js')
+
+const getFilteredSubSet = (filter) =>
+    manager.allData.tests.filter(({ result }) => filter.includes(result.toLowerCase()))
+
+const doInitFilter = () => {
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+}
+
+const doFilter = (type, show) => {
+    if (show) {
+        storageModule.showCategory(type)
+    } else {
+        storageModule.hideCategory(type)
+    }
+
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+
+    const sortColumn = storageModule.getSort()
+    doSort(sortColumn, true)
+}
+
+module.exports = {
+    doFilter,
+    doInitFilter,
+}
+
+},{"./datamanager.js":1,"./sort.js":7,"./storage.js":8}],4:[function(require,module,exports){
+const { redraw, bindEvents, renderStatic } = require('./main.js')
+const { doInitFilter } = require('./filter.js')
+const { doInitSort } = require('./sort.js')
+const { manager } = require('./datamanager.js')
+const data = JSON.parse(document.getElementById('data-container').dataset.jsonblob)
+
+function init() {
+    manager.setManager(data)
+    doInitFilter()
+    doInitSort()
+    renderStatic()
+    redraw()
+    bindEvents()
+}
+
+init()
+
+},{"./datamanager.js":1,"./filter.js":3,"./main.js":5,"./sort.js":7}],5:[function(require,module,exports){
+const { dom, find, findAll } = require('./dom.js')
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const { doFilter } = require('./filter.js')
+const {
+    getVisible,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    getSortDirection,
+    possibleFilters,
+} = require('./storage.js')
+
+const removeChildren = (node) => {
+    while (node.firstChild) {
+        node.removeChild(node.firstChild)
+    }
+}
+
+const renderStatic = () => {
+    const renderEnvironmentTable = () => {
+        const environment = manager.environment
+        const rows = Object.keys(environment).map((key) => dom.getStaticRow(key, environment[key]))
+        const table = document.getElementById('environment')
+        removeChildren(table)
+        rows.forEach((row) => table.appendChild(row))
+    }
+    renderEnvironmentTable()
+}
+
+const addItemToggleListener = (elem) => {
+    elem.addEventListener('click', ({ target }) => {
+        const id = target.parentElement.dataset.id
+        manager.toggleCollapsedItem(id)
+
+        const collapsedIds = getCollapsedIds()
+        if (collapsedIds.includes(id)) {
+            const updated = collapsedIds.filter((item) => item !== id)
+            setCollapsedIds(updated)
+        } else {
+            collapsedIds.push(id)
+            setCollapsedIds(collapsedIds)
+        }
+        redraw()
+    })
+}
+
+const renderContent = (tests) => {
+    const sortAttr = getSort(manager.initialSort)
+    const sortAsc = JSON.parse(getSortDirection())
+    const rows = tests.map(dom.getResultTBody)
+    const table = document.getElementById('results-table')
+    const tableHeader = document.getElementById('results-table-head')
+
+    const newTable = document.createElement('table')
+    newTable.id = 'results-table'
+
+    // remove all sorting classes and set the relevant
+    findAll('.sortable', tableHeader).forEach((elem) => elem.classList.remove('asc', 'desc'))
+    tableHeader.querySelector(`.sortable[data-column-type="${sortAttr}"]`)?.classList.add(sortAsc ? 'desc' : 'asc')
+    newTable.appendChild(tableHeader)
+
+    if (!rows.length) {
+        const emptyTable = document.getElementById('template_results-table__body--empty').content.cloneNode(true)
+        newTable.appendChild(emptyTable)
+    } else {
+        rows.forEach((row) => {
+            if (!!row) {
+                findAll('.collapsible td:not(.col-links', row).forEach(addItemToggleListener)
+                find('.logexpander', row).addEventListener('click',
+                    (evt) => evt.target.parentNode.classList.toggle('expanded'),
+                )
+                newTable.appendChild(row)
+            }
+        })
+    }
+
+    table.replaceWith(newTable)
+}
+
+const renderDerived = () => {
+    const currentFilter = getVisible()
+    possibleFilters.forEach((result) => {
+        const input = document.querySelector(`input[data-test-result="${result}"]`)
+        input.checked = currentFilter.includes(result)
+    })
+}
+
+const bindEvents = () => {
+    const filterColumn = (evt) => {
+        const { target: element } = evt
+        const { testResult } = element.dataset
+
+        doFilter(testResult, element.checked)
+        const collapsedIds = getCollapsedIds()
+        const updated = manager.renderData.tests.map((test) => {
+            return {
+                ...test,
+                collapsed: collapsedIds.includes(test.id),
+            }
+        })
+        manager.setRender(updated)
+        redraw()
+    }
+
+    const header = document.getElementById('environment-header')
+    header.addEventListener('click', () => {
+        const table = document.getElementById('environment')
+        table.classList.toggle('hidden')
+        header.classList.toggle('collapsed')
+    })
+
+    findAll('input[name="filter_checkbox"]').forEach((elem) => {
+        elem.addEventListener('click', filterColumn)
+    })
+
+    findAll('.sortable').forEach((elem) => {
+        elem.addEventListener('click', (evt) => {
+            const { target: element } = evt
+            const { columnType } = element.dataset
+            doSort(columnType)
+            redraw()
+        })
+    })
+
+    document.getElementById('show_all_details').addEventListener('click', () => {
+        manager.allCollapsed = false
+        setCollapsedIds([])
+        redraw()
+    })
+    document.getElementById('hide_all_details').addEventListener('click', () => {
+        manager.allCollapsed = true
+        const allIds = manager.renderData.tests.map((test) => test.id)
+        setCollapsedIds(allIds)
+        redraw()
+    })
+}
+
+const redraw = () => {
+    const { testSubset } = manager
+
+    renderContent(testSubset)
+    renderDerived()
+}
+
+module.exports = {
+    redraw,
+    bindEvents,
+    renderStatic,
+}
+
+},{"./datamanager.js":1,"./dom.js":2,"./filter.js":3,"./sort.js":7,"./storage.js":8}],6:[function(require,module,exports){
+class MediaViewer {
+    constructor(assets) {
+        this.assets = assets
+        this.index = 0
+    }
+
+    nextActive() {
+        this.index = this.index === this.assets.length - 1 ? 0 : this.index + 1
+        return [this.activeFile, this.index]
+    }
+
+    prevActive() {
+        this.index = this.index === 0 ? this.assets.length - 1 : this.index -1
+        return [this.activeFile, this.index]
+    }
+
+    get currentIndex() {
+        return this.index
+    }
+
+    get activeFile() {
+        return this.assets[this.index]
+    }
+}
+
+
+const setup = (resultBody, assets) => {
+    if (!assets.length) {
+        resultBody.querySelector('.media').classList.add('hidden')
+        return
+    }
+
+    const mediaViewer = new MediaViewer(assets)
+    const container = resultBody.querySelector('.media-container')
+    const leftArrow = resultBody.querySelector('.media-container__nav--left')
+    const rightArrow = resultBody.querySelector('.media-container__nav--right')
+    const mediaName = resultBody.querySelector('.media__name')
+    const counter = resultBody.querySelector('.media__counter')
+    const imageEl = resultBody.querySelector('img')
+    const sourceEl = resultBody.querySelector('source')
+    const videoEl = resultBody.querySelector('video')
+
+    const setImg = (media, index) => {
+        if (media?.format_type === 'image') {
+            imageEl.src = media.path
+
+            imageEl.classList.remove('hidden')
+            videoEl.classList.add('hidden')
+        } else if (media?.format_type === 'video') {
+            sourceEl.src = media.path
+
+            videoEl.classList.remove('hidden')
+            imageEl.classList.add('hidden')
+        }
+
+        mediaName.innerText = media?.name
+        counter.innerText = `${index + 1} / ${assets.length}`
+    }
+    setImg(mediaViewer.activeFile, mediaViewer.currentIndex)
+
+    const moveLeft = () => {
+        const [media, index] = mediaViewer.prevActive()
+        setImg(media, index)
+    }
+    const doRight = () => {
+        const [media, index] = mediaViewer.nextActive()
+        setImg(media, index)
+    }
+    const openImg = () => {
+        window.open(mediaViewer.activeFile.path, '_blank')
+    }
+    if (assets.length === 1) {
+        container.classList.add('media-container--fullscreen')
+    } else {
+        leftArrow.addEventListener('click', moveLeft)
+        rightArrow.addEventListener('click', doRight)
+    }
+    imageEl.addEventListener('click', openImg)
+}
+
+module.exports = {
+    setup,
+}
+
+},{}],7:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const storageModule = require('./storage.js')
+
+const genericSort = (list, key, ascending, customOrder) => {
+    let sorted
+    if (customOrder) {
+        sorted = list.sort((a, b) => {
+            const aValue = a.result.toLowerCase()
+            const bValue = b.result.toLowerCase()
+
+            const aIndex = customOrder.findIndex((item) => item.toLowerCase() === aValue)
+            const bIndex = customOrder.findIndex((item) => item.toLowerCase() === bValue)
+
+            // Compare the indices to determine the sort order
+            return aIndex - bIndex
+        })
+    } else {
+        sorted = list.sort((a, b) => a[key] === b[key] ? 0 : a[key] > b[key] ? 1 : -1)
+    }
+
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const durationSort = (list, ascending) => {
+    const parseDuration = (duration) => {
+        if (duration.includes(':')) {
+            // If it's in the format "HH:mm:ss"
+            const [hours, minutes, seconds] = duration.split(':').map(Number)
+            return (hours * 3600 + minutes * 60 + seconds) * 1000
+        } else {
+            // If it's in the format "nnn ms"
+            return parseInt(duration)
+        }
+    }
+    const sorted = list.sort((a, b) => parseDuration(a['duration']) - parseDuration(b['duration']))
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const doInitSort = () => {
+    const type = storageModule.getSort(manager.initialSort)
+    const ascending = storageModule.getSortDirection()
+    const list = manager.testSubset
+    const initialOrder = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed', 'Skipped', 'Passed']
+
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    if (type?.toLowerCase() === 'original') {
+        manager.setRender(list)
+    } else {
+        let sortedList
+        switch (type) {
+        case 'duration':
+            sortedList = durationSort(list, ascending)
+            break
+        case 'result':
+            sortedList = genericSort(list, type, ascending, initialOrder)
+            break
+        default:
+            sortedList = genericSort(list, type, ascending)
+            break
+        }
+        manager.setRender(sortedList)
+    }
+}
+
+const doSort = (type, skipDirection) => {
+    const newSortType = storageModule.getSort(manager.initialSort) !== type
+    const currentAsc = storageModule.getSortDirection()
+    let ascending
+    if (skipDirection) {
+        ascending = currentAsc
+    } else {
+        ascending = newSortType ? false : !currentAsc
+    }
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    const list = manager.testSubset
+    const sortedList = type === 'duration' ? durationSort(list, ascending) : genericSort(list, type, ascending)
+    manager.setRender(sortedList)
+}
+
+module.exports = {
+    doInitSort,
+    doSort,
+}
+
+},{"./datamanager.js":1,"./storage.js":8}],8:[function(require,module,exports){
+const possibleFilters = [
+    'passed',
+    'skipped',
+    'failed',
+    'error',
+    'xfailed',
+    'xpassed',
+    'rerun',
+]
+
+const getVisible = () => {
+    const url = new URL(window.location.href)
+    const settings = new URLSearchParams(url.search).get('visible')
+    const lower = (item) => {
+        const lowerItem = item.toLowerCase()
+        if (possibleFilters.includes(lowerItem)) {
+            return lowerItem
+        }
+        return null
+    }
+    return settings === null ?
+        possibleFilters :
+        [...new Set(settings?.split(',').map(lower).filter((item) => item))]
+}
+
+const hideCategory = (categoryToHide) => {
+    const url = new URL(window.location.href)
+    const visibleParams = new URLSearchParams(url.search).get('visible')
+    const currentVisible = visibleParams ? visibleParams.split(',') : [...possibleFilters]
+    const settings = [...new Set(currentVisible)].filter((f) => f !== categoryToHide).join(',')
+
+    url.searchParams.set('visible', settings)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const showCategory = (categoryToShow) => {
+    if (typeof window === 'undefined') {
+        return
+    }
+    const url = new URL(window.location.href)
+    const currentVisible = new URLSearchParams(url.search).get('visible')?.split(',').filter(Boolean) ||
+        [...possibleFilters]
+    const settings = [...new Set([categoryToShow, ...currentVisible])]
+    const noFilter = possibleFilters.length === settings.length || !settings.length
+
+    noFilter ? url.searchParams.delete('visible') : url.searchParams.set('visible', settings.join(','))
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getSort = (initialSort) => {
+    const url = new URL(window.location.href)
+    let sort = new URLSearchParams(url.search).get('sort')
+    if (!sort) {
+        sort = initialSort || 'result'
+    }
+    return sort
+}
+
+const setSort = (type) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('sort', type)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getCollapsedCategory = (renderCollapsed) => {
+    let categories
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        const collapsedItems = new URLSearchParams(url.search).get('collapsed')
+        switch (true) {
+        case !renderCollapsed && collapsedItems === null:
+            categories = ['passed']
+            break
+        case collapsedItems?.length === 0 || /^["']{2}$/.test(collapsedItems):
+            categories = []
+            break
+        case /^all$/.test(collapsedItems) || collapsedItems === null && /^all$/.test(renderCollapsed):
+            categories = [...possibleFilters]
+            break
+        default:
+            categories = collapsedItems?.split(',').map((item) => item.toLowerCase()) || renderCollapsed
+            break
+        }
+    } else {
+        categories = []
+    }
+    return categories
+}
+
+const getSortDirection = () => JSON.parse(sessionStorage.getItem('sortAsc')) || false
+const setSortDirection = (ascending) => sessionStorage.setItem('sortAsc', ascending)
+
+const getCollapsedIds = () => JSON.parse(sessionStorage.getItem('collapsedIds')) || []
+const setCollapsedIds = (list) => sessionStorage.setItem('collapsedIds', JSON.stringify(list))
+
+module.exports = {
+    getVisible,
+    hideCategory,
+    showCategory,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    setSort,
+    getSortDirection,
+    setSortDirection,
+    getCollapsedCategory,
+    possibleFilters,
+}
+
+},{}]},{},[4]);
+    </script>
+  </footer>
+  </body>
+</html>
