@@ -113,12 +113,9 @@ def test_tc032_labels_focus_their_fields(page: Page, home, label_for):
     expect(page.locator(f"#{label_for}")).to_be_focused()
 
 
-@pytest.mark.bug
-@pytest.mark.xfail(strict=True, reason="BUG-001 (гіпотеза): <form> без data-netlify=\"true\": "
-                                       "Netlify не виявить форму під час деплою, відправка на проді може повертати 404")
-def test_tc033_form_is_declared_for_netlify(home):
-    attrs = home.form.evaluate("el => ({dn: el.getAttribute('data-netlify'), n: el.hasAttribute('netlify')})")
-    assert attrs["dn"] == "true" or attrs["n"], f"Немає Netlify-атрибута на формі: {attrs}"
+def test_tc033_form_is_registered_in_netlify(home):
+    # Netlify прибирає data-netlify під час деплою і додає hidden form-name: це ознака, що форму зареєстровано
+    expect(home.form).to_have_attribute("name", "pairing-request")
     expect(home.form.locator('input[name="form-name"]')).to_have_attribute("value", "pairing-request")
 
 
