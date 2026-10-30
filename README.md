@@ -38,9 +38,16 @@ pytest --headed --slowmo 300                           # дивитись очи
 - Нумерація `test_tcNNN_*` збігається з ID у `docs/test-cases.xlsx`.
 
 ## Результат прогону (2026-10-30)
-Chromium 156 + WebKit 27.2: **116 passed, 5 xfailed (відомі баги), 1 xpassed, 0 failed.**
-Firefox у середовищі розробки не запускався (TLS-проксі пісочниці); його перевіряє CI.
-Перший запуск CI: зелений у Chromium, Firefox і WebKit.
-Цифри вище отримано до закриття BUG-001: TC-033 тепер звичайний тест, а не xfail.
+CI, браузер за браузером:
+
+| Браузер | passed | xfailed | xpassed | failed |
+|---|---|---|---|---|
+| Chromium | 66 | 5 | 1 | 0 |
+| Firefox | 66 | 6 | 0 | 0 |
+| WebKit | 66 | 5 | 1 | 0 |
+
+xpassed є плаваючим BUG-003: дубль відправки відтворюється не в кожному запуску.
+Lighthouse (mobile, TC-049) не показав оцінок нижче 90; значення лежать в артефакті `lighthouse-results`.
+Звіт LanguageTool (TC-040): `reports/languagetool.txt` в артефактах `report-*`.
 TC-034 виконано вручну: заявка дійшла в Netlify Forms, BUG-001 закрито як не баг.
-Ручні кейси (TC-035, 038, 039, 040, 046, 049, 050) ще не виконані: див. `docs/test-cases.xlsx`.
+Лишилися TC-035 (що бачить користувач після відправки) і TC-039 (питання до вимог): див. `docs/test-cases.xlsx`.
