@@ -1,4 +1,4 @@
-"""TC-017..019, TC-037: відео, YouTube-фасад, карта. Сторонні домени заблоковані заглушками."""
+"""TC-017..019, TC-037, TC-038: відео, YouTube-фасад, карта, погода. Сторонні домени заблоковані заглушками."""
 import re
 
 import pytest
@@ -44,3 +44,9 @@ def test_tc037_map_loads_lazily(page: Page, home, block_third_party):
     expect(home.map_iframe).not_to_have_attribute("src", re.compile(r".+"))
     home.map_iframe.scroll_into_view_if_needed()
     expect(home.map_iframe).to_have_attribute("src", re.compile(r"maps\.google\.com"))
+
+
+def test_tc038_weather_link_points_to_forecast(page: Page, home):
+    # Посилання перевіряємо без переходу: сторонній сайт поза межами тестування
+    weather = page.get_by_role("link", name="Прогноз погоди у Львові")
+    expect(weather).to_have_attribute("href", re.compile(r"^https://forecast7\.com/uk/.+/lviv/$"))

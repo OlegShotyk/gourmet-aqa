@@ -120,6 +120,13 @@ def test_tc033_form_is_registered_in_netlify(home):
 
 
 @pytest.mark.bug
+@pytest.mark.xfail(strict=True, reason="Q2: немає контейнера role=alert / aria-live для повідомлення про результат")
+def test_tc035_form_has_live_region_for_result(page: Page, home):
+    # Лише розмітка: сторінку після реальної відправки автотести не бачать
+    assert page.locator('[role="alert"], [aria-live]').count() > 0
+
+
+@pytest.mark.bug
 @pytest.mark.xfail(strict=False, reason="BUG-003: немає захисту від подвійної відправки (WebKit: 2 POST; "
                                         "у Chromium залежить від таймінгу, тому strict=False)")
 def test_tc036_double_click_does_not_send_duplicates(home, capture):

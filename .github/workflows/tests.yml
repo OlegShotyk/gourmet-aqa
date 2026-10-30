@@ -39,3 +39,16 @@ jobs:
           name: report-${{ matrix.browser }}
           path: reports/
           retention-days: 14
+
+  lighthouse:   # TC-049: поки поріг лише попереджає, бо оцінки коливаються між запусками
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Lighthouse (mobile)
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: https://gourmet-info.netlify.app/
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
